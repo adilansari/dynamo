@@ -7,45 +7,60 @@ import java.util.Formatter;
 import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 
 public class SimpleDynamoProvider extends ContentProvider {
-
-	@Override
+	
+	private String Node_id;
+	private myHelper myDb;
+	private SQLiteDatabase db;
+	static final String TAG= "adil provider";
+	private static final String AUTHORITY = "edu.buffalo.cse.cse486586.simpledynamo.provider";
+	private static final String BASE_PATH = myHelper.TABLE_NAME;
+	public static final Uri CONTENT_URI = Uri.parse("content://"+ AUTHORITY + "/" + BASE_PATH);
+	
 	public int delete(Uri uri, String selection, String[] selectionArgs) {
-		// TODO Auto-generated method stub
+		if(Node_id == null)
+			Node_id = SimpleDynamoActivity.get_node_id();
+		
 		return 0;
 	}
 
-	@Override
+	
 	public String getType(Uri uri) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
-	@Override
+	
 	public Uri insert(Uri uri, ContentValues values) {
-		// TODO Auto-generated method stub
+		if(Node_id == null)
+			Node_id = SimpleDynamoActivity.get_node_id();
+		
 		return null;
 	}
 
-	@Override
+	
 	public boolean onCreate() {
-		// TODO Auto-generated method stub
+		if(Node_id == null)
+			Node_id = SimpleDynamoActivity.get_node_id();
+		
 		return false;
 	}
 
-	@Override
+	
 	public Cursor query(Uri uri, String[] projection, String selection,
 			String[] selectionArgs, String sortOrder) {
-		// TODO Auto-generated method stub
+		if(Node_id == null)
+			Node_id = SimpleDynamoActivity.get_node_id();
+		
 		return null;
 	}
 
-	@Override
+	
 	public int update(Uri uri, ContentValues values, String selection,
 			String[] selectionArgs) {
-		// TODO Auto-generated method stub
+		
 		return 0;
 	}
 
