@@ -27,7 +27,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:text="@string/button_put1" />
+        android:text="@string/button_put1"
+        android:onClick="Put1" />
 
     <Button
         android:id="@+id/button2"
@@ -35,7 +36,8 @@
         android:layout_height="wrap_content"
         android:layout_above="@+id/textView1"
         android:layout_centerHorizontal="true"
-        android:text="@string/button_put2" />
+        android:text="@string/button_put2"
+        android:onClick="Put2" />
 
     <Button
         android:id="@+id/button3"
@@ -43,7 +45,8 @@
         android:layout_height="wrap_content"
         android:layout_above="@+id/textView1"
         android:layout_alignRight="@+id/textView1"
-        android:text="@string/button_put3" />
+        android:text="@string/button_put3"
+        android:onClick="Put3" />
 
     <Button
         android:id="@+id/button4"
@@ -51,7 +54,8 @@
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/textView1"
         android:layout_below="@+id/textView1"
-        android:text="@string/button_ldump" />
+        android:text="@string/button_ldump"
+        android:onClick="LDump" />
 
     <Button
         android:id="@+id/button5"
@@ -59,6 +63,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_below="@+id/textView1"
-        android:text="@string/button_get" />
+        android:text="@string/button_get"
+        android:onClick="Get" />
 
 </RelativeLayout>

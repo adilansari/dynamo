@@ -1,10 +1,13 @@
 package edu.buffalo.cse.cse486586.simpledynamo;
 
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.app.Activity;
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.telephony.TelephonyManager;
 import android.text.method.ScrollingMovementMethod;
 import android.view.Menu;
@@ -18,19 +21,18 @@ public class SimpleDynamoActivity extends Activity {
 	int avd_port;
 	static ContentResolver mContentResolver;
 	private Handler uiHandle= new Handler();
+	private static final String AUTHORITY = "edu.buffalo.cse.cse486586.simpledynamo.provider";
+	private static final String BASE_PATH = myHelper.TABLE_NAME;
+	public static final Uri CONTENT_URI = Uri.parse("content://"+ AUTHORITY + "/" + BASE_PATH);
 	
-	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_simple_dynamo);
-    
+		mContentResolver = getContentResolver();
 		TextView tv = (TextView) findViewById(R.id.textView1);
         tv.setMovementMethod(new ScrollingMovementMethod());
-        
         String portStr = get_portStr();
     	Node_id = portStr;
-    	
-    	
 	}
 	
 	public static String get_node_id(){
@@ -38,8 +40,7 @@ public class SimpleDynamoActivity extends Activity {
 	}
 	
 	public void LDump(View view) {
-/*    	SimpleDhtProvider.dump_flag = true;
-    	Cursor resultCursor = mContentResolver.query(SimpleDhtProvider.CONTENT_URI, null, null, null, "local");
+    	Cursor resultCursor = mContentResolver.query(CONTENT_URI, null, null, null, "local");
     	if (resultCursor.moveToFirst()) {
     	    while (!resultCursor.isAfterLast()) {
     	    	int keyIndex = resultCursor.getColumnIndex("key");
@@ -50,19 +51,28 @@ public class SimpleDynamoActivity extends Activity {
     	        resultCursor.moveToNext();
     	    	}
     	    }
-    	SimpleDhtProvider.dump_flag = false;
-*/    }
+    }
+	
+	private void insertValues(String j) {
+		ContentValues _cv = new ContentValues();
+		for(int i=0 ; i<20 ; i++) {
+			_cv.put(myHelper.KEY_FIELD, Integer.toString(i));
+			_cv.put(myHelper.VALUE_FIELD, j+Integer.toString(i));
+        	mContentResolver.insert(CONTENT_URI, _cv);
+		}
+    }
 
 	public void Put1(View view) {
+		insertValues("Put1");
 		
 	}
 	
 	public void Put2(View view) {
-		
+		insertValues("Put2");
 	}
 	
 	public void Put3(View view) {
-		
+		insertValues("Put3");
 	}
 	
 	public void Get(View view) {
@@ -81,19 +91,13 @@ public class SimpleDynamoActivity extends Activity {
     		public void run() {
     			TextView textView = (TextView)findViewById(R.id.textView1);
     			textView.setMovementMethod(new ScrollingMovementMethod());
-    	    	//Log.v(TAG, "updating textview");
     	    	textView.append(msg+"\n");
-    	    	//Log.v(TAG, "updated textview");
        		}
     	});
     }
-
 	
-	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.simple_dynamo, menu);
 		return true;
 	}
-
 }

@@ -5,10 +5,12 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Formatter;
 
 import android.content.ContentProvider;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
+import android.util.Log;
 
 public class SimpleDynamoProvider extends ContentProvider {
 	
@@ -26,7 +28,6 @@ public class SimpleDynamoProvider extends ContentProvider {
 		
 		return 0;
 	}
-
 	
 	public String getType(Uri uri) {
 		return null;
@@ -36,16 +37,24 @@ public class SimpleDynamoProvider extends ContentProvider {
 	public Uri insert(Uri uri, ContentValues values) {
 		if(Node_id == null)
 			Node_id = SimpleDynamoActivity.get_node_id();
-		
+		db = myDb.getWritableDatabase();
+		long rowId= db.replace(myHelper.TABLE_NAME, myHelper.VALUE_FIELD, values);
+		if (rowId > 0) {
+			Uri newUri = ContentUris.withAppendedId(CONTENT_URI, rowId);
+			getContext().getContentResolver().notifyChange(newUri, null);
+			Log.i(TAG, "Insertion success # " + Long.toString(rowId));
+			return newUri;
+		} else {
+			Log.e(TAG, "Insert to db failed");
+		}
 		return null;
 	}
 
-	
 	public boolean onCreate() {
-		if(Node_id == null)
-			Node_id = SimpleDynamoActivity.get_node_id();
-		
-		return false;
+		Log.v(TAG, "provider created");
+		myDb = new myHelper(getContext());
+		myDb.getWritableDatabase();
+		return true;
 	}
 
 	
@@ -53,8 +62,12 @@ public class SimpleDynamoProvider extends ContentProvider {
 			String[] selectionArgs, String sortOrder) {
 		if(Node_id == null)
 			Node_id = SimpleDynamoActivity.get_node_id();
-		
-		return null;
+		Cursor c = null;
+		if(selection != null)
+			c= db.rawQuery("select * from "+myHelper.TABLE_NAME+" where key like '"+selection+"'", null);
+		else
+			c= db.rawQuery("select * from "+myHelper.TABLE_NAME, null);
+		return c;
 	}
 
 	
