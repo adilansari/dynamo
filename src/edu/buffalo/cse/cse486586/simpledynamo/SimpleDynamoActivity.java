@@ -26,11 +26,13 @@ public class SimpleDynamoActivity extends Activity {
 	private static final String AUTHORITY = "edu.buffalo.cse.cse486586.simpledynamo.provider";
 	private static final String BASE_PATH = myHelper.TABLE_NAME;
 	public static final Uri CONTENT_URI = Uri.parse("content://"+ AUTHORITY + "/" + BASE_PATH);
+	private SimpleDynamoProvider obj;
 	
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_simple_dynamo);
 		mContentResolver = getContentResolver();
+		obj = SimpleDynamoProvider.getInstance();
 		TextView tv = (TextView) findViewById(R.id.textView1);
         tv.setMovementMethod(new ScrollingMovementMethod());
         String portStr = get_portStr();
@@ -60,10 +62,7 @@ public class SimpleDynamoActivity extends Activity {
 	private void insertValues(String j) {
 		ContentValues _cv = new ContentValues();
 		for(int i=0 ; i<20 ; i++) {
-			_cv.put(myHelper.KEY_FIELD, Integer.toString(i));
-			_cv.put(myHelper.VALUE_FIELD, j+Integer.toString(i));
-			_cv.put(myHelper.VERSION_FIELD, version);
-        	mContentResolver.insert(CONTENT_URI, _cv);
+			obj.insertRequest(Integer.toString(i),j+Integer.toString(i),version);
         	try {
 				Thread.sleep(1000);
 			} catch (InterruptedException e) {

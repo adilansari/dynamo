@@ -3,6 +3,7 @@ package edu.buffalo.cse.cse486586.simpledynamo;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -16,23 +17,47 @@ import android.util.Log;
 
 public class SimpleDynamoProvider extends ContentProvider {
 	
-	private String Node_id;
-	private myHelper myDb;
-	private SQLiteDatabase db;
+	private static String Node_id;
+	private static myHelper myDb;
+	private static SQLiteDatabase db;
 	private static LinkedList list;
 	private static ExecutorService Pool = Executors.newFixedThreadPool(3);
 	private static SortedMap<String, String> map = new TreeMap<String, String>();
+	private static Map<String , Integer> port_map = new HashMap<String, Integer>();
+	private static ArrayBlockingQueue<Integer> block_ins = new ArrayBlockingQueue<Integer>(1);
 	public String[] nodes = {"5554","5556","5558"};
 	static final String TAG= "adil provider";
 	private static final String AUTHORITY = "edu.buffalo.cse.cse486586.simpledynamo.provider";
 	private static final String BASE_PATH = myHelper.TABLE_NAME;
 	public static final Uri CONTENT_URI = Uri.parse("content://"+ AUTHORITY + "/" + BASE_PATH);
+	private static SimpleDynamoProvider obj= new SimpleDynamoProvider();
 	
 	public int delete(Uri uri, String selection, String[] selectionArgs) {
 		if(Node_id == null)
 			Node_id = SimpleDynamoActivity.get_node_id();
 		
 		return 0;
+	}
+	
+	public static SimpleDynamoProvider getInstance(){
+		return obj;
+	}
+	
+	public void insertRequest(String key, String value, int version) {
+		if(Node_id == null)
+			Node_id = SimpleDynamoActivity.get_node_id();
+		String cord = getNode(key);
+		if(cord.equals(Node_id)) {
+			ContentValues _cv = new ContentValues();
+			_cv.put(myHelper.KEY_FIELD, key);
+			_cv.put(myHelper.VALUE_FIELD, value);
+			_cv.put(myHelper.VERSION_FIELD, Integer.toString(version));
+			insert(CONTENT_URI,_cv);
+		} else {
+			Pool.execute(new Send(new Message("insertc",key,value,version),port_map.get(cord)));
+			
+		}
+		
 	}
 	
 	public String getType(Uri uri) {
@@ -70,10 +95,11 @@ public class SimpleDynamoProvider extends ContentProvider {
 				String hashNode = genHash(node);
 				String prev = list.get(node).prev.data;
 				String hashPre = genHash(prev);
-				if(hashKey.compareTo(hashNode) <= 0 && hashKey.compareTo(hashPre) > 0)
-	    			result = node;
-	    		else if(node.equals(leader) && (hashKey.compareTo(hashNode) <= 0 || hashKey.compareTo(hashPre) > 0))
-	    			result = node;
+				if(hashKey.compareTo(hashNode) <= 0 && hashKey.compareTo(hashPre) > 0){
+					result = node;	break;
+				} else if(node.equals(leader) && (hashKey.compareTo(hashNode) <= 0 || hashKey.compareTo(hashPre) > 0)) {
+						result = node;	break;
+				}
 			}
 		} catch (NoSuchAlgorithmException e) {
 			Log.e(TAG, "Hash Fail");
@@ -94,6 +120,7 @@ public class SimpleDynamoProvider extends ContentProvider {
 			try {
 				String hash = genHash(n);
 				map.put(hash, n);
+				port_map.put(n, Integer.parseInt(n)*2);
 			} catch (NoSuchAlgorithmException e) {
 				Log.e(TAG, "No such algorithm");
 			}
