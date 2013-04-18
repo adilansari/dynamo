@@ -62,8 +62,8 @@ public class SimpleDynamoActivity extends Activity {
 	private void insertValues(String j) {
 		ContentValues _cv = new ContentValues();
 		for(int i=0 ; i<20 ; i++) {
-			obj.insertRequest(Integer.toString(i),j+Integer.toString(i),version);
-        	try {
+			try {
+				obj.insertRequest(Integer.toString(i),j+Integer.toString(i),version);
 				Thread.sleep(1000);
 			} catch (InterruptedException e) {
 				Log.e(TAG, "Put Sleep fail");

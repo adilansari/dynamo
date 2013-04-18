@@ -6,6 +6,7 @@ import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import android.content.ContentProvider;
 import android.content.ContentUris;
@@ -43,7 +44,7 @@ public class SimpleDynamoProvider extends ContentProvider {
 		return obj;
 	}
 	
-	public void insertRequest(String key, String value, int version) {
+	public void insertRequest(String key, String value, int version) throws InterruptedException {
 		if(Node_id == null)
 			Node_id = SimpleDynamoActivity.get_node_id();
 		String cord = getNode(key);
@@ -55,9 +56,12 @@ public class SimpleDynamoProvider extends ContentProvider {
 			insert(CONTENT_URI,_cv);
 		} else {
 			Pool.execute(new Send(new Message("insertc",key,value,version),port_map.get(cord)));
-			
+			boolean ins_suc= block_ins.poll(800, TimeUnit.MILLISECONDS) != null;
+			if(!ins_suc) {
+				//dispatch two replica inserts
+			}
 		}
-		
+		//failure/recovery
 	}
 	
 	public String getType(Uri uri) {
@@ -112,6 +116,8 @@ public class SimpleDynamoProvider extends ContentProvider {
 		myDb = new myHelper(getContext());
 		myDb.getWritableDatabase();
 		updateDataStruct();
+		ExecutorService e= Executors.newSingleThreadExecutor();
+		e.execute(new Listener());
 		return true;
 	}
 	
