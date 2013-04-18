@@ -45,7 +45,7 @@ public class SimpleDynamoActivity extends Activity {
 	
 	public void LDump(View view) {
     	Cursor resultCursor = mContentResolver.query(CONTENT_URI, null, null, null, "local");
-    	if (resultCursor.moveToFirst()) {
+    	if (resultCursor != null && resultCursor.moveToFirst()) {
     	    while (!resultCursor.isAfterLast()) {
     	    	int keyIndex = resultCursor.getColumnIndex("key");
     	        int valueIndex = resultCursor.getColumnIndex("value");
@@ -53,10 +53,13 @@ public class SimpleDynamoActivity extends Activity {
     	    	String returnKey = resultCursor.getString(keyIndex);
     	        String returnValue = resultCursor.getString(valueIndex);
     	        String returnVersion = resultCursor.getString(versionIndex);
-    	        updateTextView(returnKey+" "+returnValue);
+    	        updateTextView(returnKey+" "+returnValue+ " "+ returnVersion);
     	        resultCursor.moveToNext();
     	    	}
     	    }
+    	else {
+    		
+    	}
     }
 	
 	private void insertValues(String j) {
@@ -64,7 +67,7 @@ public class SimpleDynamoActivity extends Activity {
 		for(int i=0 ; i<20 ; i++) {
 			try {
 				obj.insertRequest(Integer.toString(i),j+Integer.toString(i),version);
-				Thread.sleep(1000);
+				Thread.sleep(1700);
 			} catch (InterruptedException e) {
 				Log.e(TAG, "Put Sleep fail");
 			}

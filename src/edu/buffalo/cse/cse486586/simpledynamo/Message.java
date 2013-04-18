@@ -16,7 +16,7 @@ public class Message implements Serializable {
 	long rowId;
 	HashMap<String, String> map;
 	
-	//insertc  replica
+	//insertc  replica ins_ack
 	Message(String id, String key, String value, int version) {
 		this.id = id;
 		this.key =key;

@@ -56,8 +56,9 @@ public class SimpleDynamoProvider extends ContentProvider {
 			insert(CONTENT_URI,_cv);
 		} else {
 			Pool.execute(new Send(new Message("insertc",key,value,version),port_map.get(cord)));
-			boolean ins_suc= block_ins.poll(800, TimeUnit.MILLISECONDS) != null;
+			boolean ins_suc= block_ins.poll(1200, TimeUnit.MILLISECONDS) != null;
 			if(!ins_suc) {
+				Log.i(TAG, "Timeout");
 				replicate(cord, key, value,version);
 			}
 		}
@@ -85,7 +86,7 @@ public class SimpleDynamoProvider extends ContentProvider {
 		long rowId= db.replace(myHelper.TABLE_NAME, myHelper.VALUE_FIELD, values);
 		if (rowId > 0) {
 			Uri newUri = ContentUris.withAppendedId(CONTENT_URI, rowId);
-			getContext().getContentResolver().notifyChange(newUri, null);
+			//getContext().getContentResolver().notifyChange(newUri, null);
 			Log.i(TAG, "Insertion success # " + Long.toString(rowId));
 			return newUri;
 		} else {
@@ -98,11 +99,11 @@ public class SimpleDynamoProvider extends ContentProvider {
 		String result = null;
 		try {
 			String hashKey = genHash(Key);
-			String leader = map.firstKey();
+			String leader = map.get(map.firstKey());
 			for(Map.Entry<String, String> entry: map.entrySet()) {
 				String node = entry.getValue();
 				String hashNode = genHash(node);
-				String prev = list.get(node).prev.data;
+				String prev = list.get(node).next.data;
 				String hashPre = genHash(prev);
 				if(hashKey.compareTo(hashNode) <= 0 && hashKey.compareTo(hashPre) > 0){
 					result = node;	break;
