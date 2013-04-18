@@ -15,7 +15,8 @@ public class myHelper extends SQLiteOpenHelper {
 	public static final String TABLE_NAME= "Store";
 	public static final String KEY_FIELD= "key";
 	public static final String VALUE_FIELD = "value";
-	public static final String CREATE_TABLE= "CREATE TABLE " + TABLE_NAME + "(" + KEY_FIELD + " TEXT PRIMARY KEY, " + VALUE_FIELD + " TEXT);";
+	public static final String VERSION_FIELD = "version";
+	public static final String CREATE_TABLE= "CREATE TABLE " + TABLE_NAME + "(" + KEY_FIELD + " TEXT PRIMARY KEY, " + VALUE_FIELD + " TEXT, " + VERSION_FIELD + " INTEGER);";
 	public static final String TAG= "adil";
 
 	public myHelper(Context context) {

@@ -10,6 +10,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.telephony.TelephonyManager;
 import android.text.method.ScrollingMovementMethod;
+import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.widget.TextView;
@@ -19,6 +20,7 @@ public class SimpleDynamoActivity extends Activity {
 	private static String Node_id;
 	String TAG= "adil";
 	int avd_port;
+	private static int version =0;
 	static ContentResolver mContentResolver;
 	private Handler uiHandle= new Handler();
 	private static final String AUTHORITY = "edu.buffalo.cse.cse486586.simpledynamo.provider";
@@ -45,8 +47,10 @@ public class SimpleDynamoActivity extends Activity {
     	    while (!resultCursor.isAfterLast()) {
     	    	int keyIndex = resultCursor.getColumnIndex("key");
     	        int valueIndex = resultCursor.getColumnIndex("value");
+    	        int versionIndex = resultCursor.getColumnIndex("version");
     	    	String returnKey = resultCursor.getString(keyIndex);
     	        String returnValue = resultCursor.getString(valueIndex);
+    	        String returnVersion = resultCursor.getString(versionIndex);
     	        updateTextView(returnKey+" "+returnValue);
     	        resultCursor.moveToNext();
     	    	}
@@ -58,8 +62,15 @@ public class SimpleDynamoActivity extends Activity {
 		for(int i=0 ; i<20 ; i++) {
 			_cv.put(myHelper.KEY_FIELD, Integer.toString(i));
 			_cv.put(myHelper.VALUE_FIELD, j+Integer.toString(i));
+			_cv.put(myHelper.VERSION_FIELD, version);
         	mContentResolver.insert(CONTENT_URI, _cv);
+        	try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				Log.e(TAG, "Put Sleep fail");
+			}
 		}
+		version++;
     }
 
 	public void Put1(View view) {

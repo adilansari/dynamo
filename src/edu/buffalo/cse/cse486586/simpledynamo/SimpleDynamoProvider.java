@@ -2,7 +2,9 @@ package edu.buffalo.cse.cse486586.simpledynamo;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Formatter;
+import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import android.content.ContentProvider;
 import android.content.ContentUris;
@@ -17,6 +19,10 @@ public class SimpleDynamoProvider extends ContentProvider {
 	private String Node_id;
 	private myHelper myDb;
 	private SQLiteDatabase db;
+	private static LinkedList list;
+	private static ExecutorService Pool = Executors.newFixedThreadPool(3);
+	private static SortedMap<String, String> map = new TreeMap<String, String>();
+	public String[] nodes = {"5554","5556","5558"};
 	static final String TAG= "adil provider";
 	private static final String AUTHORITY = "edu.buffalo.cse.cse486586.simpledynamo.provider";
 	private static final String BASE_PATH = myHelper.TABLE_NAME;
@@ -37,6 +43,10 @@ public class SimpleDynamoProvider extends ContentProvider {
 	public Uri insert(Uri uri, ContentValues values) {
 		if(Node_id == null)
 			Node_id = SimpleDynamoActivity.get_node_id();
+		
+		
+		
+		
 		db = myDb.getWritableDatabase();
 		long rowId= db.replace(myHelper.TABLE_NAME, myHelper.VALUE_FIELD, values);
 		if (rowId > 0) {
@@ -49,12 +59,49 @@ public class SimpleDynamoProvider extends ContentProvider {
 		}
 		return null;
 	}
+	
+	public String getNode(String Key) {
+		String result = null;
+		try {
+			String hashKey = genHash(Key);
+			String leader = map.firstKey();
+			for(Map.Entry<String, String> entry: map.entrySet()) {
+				String node = entry.getValue();
+				String hashNode = genHash(node);
+				String prev = list.get(node).prev.data;
+				String hashPre = genHash(prev);
+				if(hashKey.compareTo(hashNode) <= 0 && hashKey.compareTo(hashPre) > 0)
+	    			result = node;
+	    		else if(node.equals(leader) && (hashKey.compareTo(hashNode) <= 0 || hashKey.compareTo(hashPre) > 0))
+	    			result = node;
+			}
+		} catch (NoSuchAlgorithmException e) {
+			Log.e(TAG, "Hash Fail");
+		}
+		return result;
+	}
 
 	public boolean onCreate() {
 		Log.v(TAG, "provider created");
 		myDb = new myHelper(getContext());
 		myDb.getWritableDatabase();
+		updateDataStruct();
 		return true;
+	}
+	
+	public void updateDataStruct() {
+		for(String n : nodes) {
+			try {
+				String hash = genHash(n);
+				map.put(hash, n);
+			} catch (NoSuchAlgorithmException e) {
+				Log.e(TAG, "No such algorithm");
+			}
+		}
+		list = new LinkedList();
+    	for(Map.Entry<String, String> entry: map.entrySet()) {
+    		list.add(entry.getValue());
+    	}
 	}
 
 	
