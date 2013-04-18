@@ -22,12 +22,12 @@ public class SimpleDynamoProvider extends ContentProvider {
 	private static myHelper myDb;
 	private static SQLiteDatabase db;
 	private static LinkedList list;
-	private static ExecutorService Pool = Executors.newFixedThreadPool(3);
-	private static SortedMap<String, String> map = new TreeMap<String, String>();
-	private static Map<String , Integer> port_map = new HashMap<String, Integer>();
-	private static ArrayBlockingQueue<Integer> block_ins = new ArrayBlockingQueue<Integer>(1);
 	public String[] nodes = {"5554","5556","5558"};
 	static final String TAG= "adil provider";
+	private static ExecutorService Pool = Executors.newFixedThreadPool(3);
+	private static SortedMap<String, String> map = new TreeMap<String, String>();
+	public static Map<String , Integer> port_map = new HashMap<String, Integer>();
+	public static ArrayBlockingQueue<Integer> block_ins = new ArrayBlockingQueue<Integer>(1);
 	private static final String AUTHORITY = "edu.buffalo.cse.cse486586.simpledynamo.provider";
 	private static final String BASE_PATH = myHelper.TABLE_NAME;
 	public static final Uri CONTENT_URI = Uri.parse("content://"+ AUTHORITY + "/" + BASE_PATH);
@@ -58,10 +58,15 @@ public class SimpleDynamoProvider extends ContentProvider {
 			Pool.execute(new Send(new Message("insertc",key,value,version),port_map.get(cord)));
 			boolean ins_suc= block_ins.poll(800, TimeUnit.MILLISECONDS) != null;
 			if(!ins_suc) {
-				//dispatch two replica inserts
+				replicate(cord, key, value,version);
 			}
 		}
 		//failure/recovery
+	}
+	
+	public void replicate(String node, String key, String value, int version) {
+		Pool.execute(new Send(new Message("replica",key,value,version),port_map.get(list.get(node).next.data)));
+		Pool.execute(new Send(new Message("replica",key,value,version),port_map.get(list.get(node).next.next.data)));
 	}
 	
 	public String getType(Uri uri) {

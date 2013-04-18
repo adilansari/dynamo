@@ -22,6 +22,7 @@ public class Message implements Serializable {
 		this.key =key;
 		this.value = value;
 		this.version = version;
+		this.Node_id = SimpleDynamoActivity.get_node_id();
 	}
 	
 }
