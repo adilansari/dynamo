@@ -20,13 +20,13 @@ public class SimpleDynamoActivity extends Activity {
 	private static String Node_id;
 	String TAG= "adil";
 	int avd_port;
-	private static int version =0;
 	static ContentResolver mContentResolver;
 	private Handler uiHandle= new Handler();
 	private static final String AUTHORITY = "edu.buffalo.cse.cse486586.simpledynamo.provider";
 	private static final String BASE_PATH = myHelper.TABLE_NAME;
 	public static final Uri CONTENT_URI = Uri.parse("content://"+ AUTHORITY + "/" + BASE_PATH);
 	private SimpleDynamoProvider obj;
+	
 	
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -64,15 +64,15 @@ public class SimpleDynamoActivity extends Activity {
 	
 	private void insertValues(String j) {
 		ContentValues _cv = new ContentValues();
+		int version = ++SimpleDynamoProvider.maxVersion;
 		for(int i=0 ; i<20 ; i++) {
 			try {
 				obj.insertRequest(Integer.toString(i),j+Integer.toString(i),version);
-				Thread.sleep(1700);
+				Thread.sleep(1000);
 			} catch (InterruptedException e) {
 				Log.e(TAG, "Put Sleep fail");
 			}
 		}
-		version++;
     }
 
 	public void Put1(View view) {
