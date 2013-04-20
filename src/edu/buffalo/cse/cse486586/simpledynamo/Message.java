@@ -28,7 +28,7 @@ public class Message implements Serializable {
 		this.version = version;
 		}
 	
-	//join
+	//join / vote
 	Message(String id, String Node_id) {
 		this.id = id;
 		this.Node_id =Node_id;
