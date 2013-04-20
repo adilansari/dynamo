@@ -10,6 +10,7 @@ public class Send implements Runnable {
 	Message o;
 	int port;
 	static final String TAG="adil send";
+	ObjectOutputStream out;
 	
 	Send(Message m, int port) {
 		this.o= m;
@@ -19,14 +20,26 @@ public class Send implements Runnable {
 	public void run() {
 		try {
 			this.sock= new Socket("10.0.2.2",port);
-			ObjectOutputStream out = new ObjectOutputStream(sock.getOutputStream());
-				out.writeObject(o);
-				out.flush();
-				out.close();
-				sock.close();
-	
-		} catch (IOException e) {
-			Log.e(TAG, e.getMessage().toString());
+			out = new ObjectOutputStream(sock.getOutputStream());
+			out.writeObject(o);
+		} catch (IOException ioe) {
+			Log.w(TAG, "io exception");
+		} finally {
+			if(out != null) {
+				try {
+					out.flush();
+					out.close();
+				} catch (IOException e) {
+					Log.w(TAG, "Output Stream null");
+				}
+			}
+			if (sock != null) {
+				try {
+					sock.close();
+				} catch (IOException e) {
+					Log.w(TAG, "Socket is null");
+				}
+			}
 		}
 	}
 }

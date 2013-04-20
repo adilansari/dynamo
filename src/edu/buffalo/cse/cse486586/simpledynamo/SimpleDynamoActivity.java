@@ -1,5 +1,7 @@
 package edu.buffalo.cse.cse486586.simpledynamo;
 
+import java.util.concurrent.Executors;
+
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -33,13 +35,16 @@ public class SimpleDynamoActivity extends Activity {
 		setContentView(R.layout.activity_simple_dynamo);
 		mContentResolver = getContentResolver();
 		obj = SimpleDynamoProvider.getInstance();
+		Node_id = get_portStr();
 		TextView tv = (TextView) findViewById(R.id.textView1);
         tv.setMovementMethod(new ScrollingMovementMethod());
-        String portStr = get_portStr();
-    	Node_id = portStr;
+        for(String n: SimpleDynamoProvider.nodes) {
+        	Executors.newSingleThreadExecutor().execute(new Send(new Message("join",Node_id),Integer.parseInt(n)*2));
+		}
 	}
 	
 	public static String get_node_id(){
+		//while(Node_id != null){}
 		return Node_id;
 	}
 	
@@ -98,16 +103,15 @@ public class SimpleDynamoActivity extends Activity {
 	    	    	String returnKey = resultCursor.getString(keyIndex);
 	    	        String returnValue = resultCursor.getString(valueIndex);
 	    	        String returnVersion = resultCursor.getString(versionIndex);
+	    	        try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
 	    	        updateTextView(returnKey+" "+returnValue);
-	    	    }
-	    	else {
+	    	    } else {
 	    		updateTextView("Partition Empty");
-	    	}
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+	    	    }
 		}
 	}
 	

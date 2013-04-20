@@ -16,13 +16,28 @@ public class Message implements Serializable {
 	long rowId;
 	HashMap<String, String> map;
 	
+	{
+		this.Node_id = SimpleDynamoActivity.get_node_id();
+	}
+	
 	//insertc  replica ins_ack query
 	Message(String id, String key, String value, int version) {
 		this.id = id;
 		this.key =key;
 		this.value = value;
 		this.version = version;
-		this.Node_id = SimpleDynamoActivity.get_node_id();
+		}
+	
+	//join
+	Message(String id, String Node_id) {
+		this.id = id;
+		this.Node_id =Node_id;
 	}
 	
+	//recovery
+	Message(String id, HashMap<String,String> m, int version) {
+		this.id =id;
+		this.map =m;
+		this.version = version;
+	}
 }

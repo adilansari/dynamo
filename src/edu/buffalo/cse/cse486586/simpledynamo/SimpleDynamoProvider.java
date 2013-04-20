@@ -23,7 +23,7 @@ public class SimpleDynamoProvider extends ContentProvider {
 	private static myHelper myDb;
 	private static SQLiteDatabase db;
 	private static LinkedList list;
-	public String[] nodes = {"5554","5556","5558"};
+	public static String[] nodes = {"5554","5556","5558"};
 	static final String TAG= "adil provider";
 	private static ExecutorService Pool = Executors.newFixedThreadPool(3);
 	private static SortedMap<String, String> map = new TreeMap<String, String>();
@@ -38,9 +38,6 @@ public class SimpleDynamoProvider extends ContentProvider {
 	public static int maxVersion = 0;
 	
 	public int delete(Uri uri, String selection, String[] selectionArgs) {
-		if(Node_id == null)
-			Node_id = SimpleDynamoActivity.get_node_id();
-		
 		return 0;
 	}
 	
@@ -65,7 +62,7 @@ public class SimpleDynamoProvider extends ContentProvider {
 			Pool.execute(new Send(new Message("insertc",key,value,version),port_map.get(cord)));
 			boolean ins_suc= block_ins.poll(1300, TimeUnit.MILLISECONDS) != null;
 			if(!ins_suc) {
-				Log.e(TAG, "Timeout");
+				Log.e(TAG, "Timeout "+cord);
 				fail_map.put(cord, false);
 				replicate(cord, key, value,version);
 			}
@@ -75,7 +72,7 @@ public class SimpleDynamoProvider extends ContentProvider {
 	
 	public void replicate(String node, String key, String value, int version) {
 		Pool.execute(new Send(new Message("replica",key,value,version),port_map.get(list.get(node).prev.data)));
-		Pool.execute(new Send(new Message("replica",key,value,version),port_map.get(list.get(node).prev.prev.data)));
+		Pool.execute(new Send(new Message("replica",key,value,version),port_map.get(list.get(node).next.data)));
 	}
 	
 	public String getType(Uri uri) {
@@ -166,7 +163,7 @@ public class SimpleDynamoProvider extends ContentProvider {
 			Pool.execute(new Send(new Message("query",key,null,0),port_map.get(cord)));
 			result = block_query.poll(1000, TimeUnit.MILLISECONDS);
 			if (result == null) {
-				Log.e(TAG, "Timeout query");
+				Log.e(TAG, "Timeout query "+cord);
 				fail_map.put(cord, false);
 				cord = list.get(cord).prev.data;
 			}
@@ -191,6 +188,19 @@ public class SimpleDynamoProvider extends ContentProvider {
 			c= db.rawQuery("select * from "+myHelper.TABLE_NAME+" where key like '"+selection+"'", null);
 		}
 		return c;
+	}
+	
+	public void recovery(HashMap<String, String> r_map, int version) {
+		for(Map.Entry<String, String> entry: r_map.entrySet()) {
+			ContentValues _cv = new ContentValues();
+			String k = entry.getKey();
+			String v= entry.getValue();
+			_cv.put(myHelper.KEY_FIELD, k);
+			_cv.put(myHelper.VALUE_FIELD, v);
+			_cv.put(myHelper.VERSION_FIELD, Integer.toString(version));
+			insert(CONTENT_URI,_cv);
+			//replicate(Node_id, k, v,version);
+    	}
 	}
 
 	
