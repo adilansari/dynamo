@@ -58,7 +58,7 @@ public class SimpleDynamoActivity extends Activity {
     	    	}
     	    }
     	else {
-    		
+    		updateTextView("Partition Empty");
     	}
     }
 	
@@ -68,7 +68,7 @@ public class SimpleDynamoActivity extends Activity {
 		for(int i=0 ; i<20 ; i++) {
 			try {
 				obj.insertRequest(Integer.toString(i),j+Integer.toString(i),version);
-				Thread.sleep(1000);
+				Thread.sleep(1200);
 			} catch (InterruptedException e) {
 				Log.e(TAG, "Put Sleep fail");
 			}
@@ -89,7 +89,26 @@ public class SimpleDynamoActivity extends Activity {
 	}
 	
 	public void Get(View view) {
-		
+		for(int i =0; i<20; i++) {
+			Cursor resultCursor = mContentResolver.query(CONTENT_URI, null,Integer.toString(i), null, "ins");
+			if (resultCursor != null && resultCursor.moveToFirst()) {
+	    	    	int keyIndex = resultCursor.getColumnIndex("key");
+	    	        int valueIndex = resultCursor.getColumnIndex("value");
+	    	        int versionIndex = resultCursor.getColumnIndex("version");
+	    	    	String returnKey = resultCursor.getString(keyIndex);
+	    	        String returnValue = resultCursor.getString(valueIndex);
+	    	        String returnVersion = resultCursor.getString(versionIndex);
+	    	        updateTextView(returnKey+" "+returnValue);
+	    	    }
+	    	else {
+	    		updateTextView("Partition Empty");
+	    	}
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 	
 	public String get_portStr() {

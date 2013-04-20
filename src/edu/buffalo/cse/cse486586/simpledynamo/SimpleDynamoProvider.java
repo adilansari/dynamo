@@ -60,15 +60,13 @@ public class SimpleDynamoProvider extends ContentProvider {
 			insert(CONTENT_URI,_cv);
 			replicate(cord, key, value,version);
 		} else {
-			if(!fail_map.get(cord))
-				cord = list.get(cord).prev.data;
+		/*	if(!fail_map.get(cord))
+				cord = list.get(cord).prev.data;*/
 			Pool.execute(new Send(new Message("insertc",key,value,version),port_map.get(cord)));
-			boolean ins_suc= block_ins.poll(1000, TimeUnit.MILLISECONDS) != null;
+			boolean ins_suc= block_ins.poll(1300, TimeUnit.MILLISECONDS) != null;
 			if(!ins_suc) {
 				Log.e(TAG, "Timeout");
 				fail_map.put(cord, false);
-				//Pool.execute(new Send(new Message("fail",cord,null,null),port_map.get(list.get(cord).prev.data)));
-				//Pool.execute(new Send(new Message("fail",cord,null,null),port_map.get(list.get(cord).next.data)));
 				replicate(cord, key, value,version);
 			}
 			block_ins.clear();
@@ -95,9 +93,9 @@ public class SimpleDynamoProvider extends ContentProvider {
 			Uri newUri = ContentUris.withAppendedId(CONTENT_URI, rowId);
 			//update maxVersion
 			maxVersion = Math.max(maxVersion, newVersion);
-			//getContext().getContentResolver().notifyChange(newUri, null);
-			//Log.i(TAG, "Insertion success # " + Long.toString(rowId));
-			return newUri;
+/*			getContext().getContentResolver().notifyChange(newUri, null);
+			Log.i(TAG, "Insertion success # " + Long.toString(rowId));
+*/			return newUri;
 		} else {
 			Log.e(TAG, "Insert to db failed");
 		}
@@ -159,7 +157,6 @@ public class SimpleDynamoProvider extends ContentProvider {
 		String cord = getNode(key);
 		String result = null;
 		boolean b= true;
-		//if requester == cord
 		if(cord.equals(Node_id)) {
 			b=false;
 		}

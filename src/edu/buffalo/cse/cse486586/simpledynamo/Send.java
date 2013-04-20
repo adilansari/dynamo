@@ -19,13 +19,12 @@ public class Send implements Runnable {
 	public void run() {
 		try {
 			this.sock= new Socket("10.0.2.2",port);
-			if (sock.isConnected()) {
-				ObjectOutputStream out = new ObjectOutputStream(sock.getOutputStream());
+			ObjectOutputStream out = new ObjectOutputStream(sock.getOutputStream());
 				out.writeObject(o);
 				out.flush();
 				out.close();
 				sock.close();
-			}
+	
 		} catch (IOException e) {
 			Log.e(TAG, e.getMessage().toString());
 		}
