@@ -50,7 +50,7 @@ public class SimpleDynamoActivity extends Activity {
 	
 	public void LDump(View view) {
     	Cursor resultCursor = mContentResolver.query(CONTENT_URI, null, null, null, "local");
-    	if (resultCursor != null && resultCursor.moveToFirst()) {
+    	if (resultCursor.getCount()!=0 && resultCursor.moveToFirst()) {
     	    while (!resultCursor.isAfterLast()) {
     	    	int keyIndex = resultCursor.getColumnIndex("key");
     	        int valueIndex = resultCursor.getColumnIndex("value");

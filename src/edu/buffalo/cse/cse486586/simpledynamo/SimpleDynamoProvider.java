@@ -95,8 +95,14 @@ public class SimpleDynamoProvider extends ContentProvider {
 		if(Node_id == null)
 			Node_id = SimpleDynamoActivity.get_node_id();
 		int newVersion= values.getAsInteger("version");
-		db = myDb.getWritableDatabase();
-		long rowId= db.replace(myHelper.TABLE_NAME, myHelper.VALUE_FIELD, values);
+		String key = values.getAsString("key");
+		Cursor resultCursor = query(CONTENT_URI, null, key, null, "ins");
+		long rowId = 0;
+		if(resultCursor.getCount() == 0 || (resultCursor.moveToFirst() && newVersion > resultCursor.getInt(resultCursor.getColumnIndex(myHelper.VERSION_FIELD)))) {
+			db = myDb.getWritableDatabase();
+			rowId= db.replace(myHelper.TABLE_NAME, myHelper.VALUE_FIELD, values);
+			Log.d(TAG, "New version inserted");
+		}
 		if (rowId > 0) {
 			Uri newUri = ContentUris.withAppendedId(CONTENT_URI, rowId);
 			//update maxVersion
@@ -135,7 +141,7 @@ public class SimpleDynamoProvider extends ContentProvider {
 	public boolean onCreate() {
 		Log.v(TAG, "provider created");
 		myDb = new myHelper(getContext());
-		myDb.getWritableDatabase();
+		db = myDb.getWritableDatabase();
 		updateDataStruct();
 		ExecutorService e= Executors.newSingleThreadExecutor();
 		e.execute(new Listener());
