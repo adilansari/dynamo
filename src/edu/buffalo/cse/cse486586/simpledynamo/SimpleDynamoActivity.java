@@ -50,6 +50,7 @@ public class SimpleDynamoActivity extends Activity {
 	
 	public void LDump(View view) {
     	Cursor resultCursor = mContentResolver.query(CONTENT_URI, null, null, null, "local");
+    	updateTextView("Partition Empty" , true);
     	if (resultCursor.getCount()!=0 && resultCursor.moveToFirst()) {
     	    while (!resultCursor.isAfterLast()) {
     	    	int keyIndex = resultCursor.getColumnIndex("key");
@@ -58,20 +59,20 @@ public class SimpleDynamoActivity extends Activity {
     	    	String returnKey = resultCursor.getString(keyIndex);
     	        String returnValue = resultCursor.getString(valueIndex);
     	        String returnVersion = resultCursor.getString(versionIndex);
-    	        updateTextView(returnKey+" "+returnValue+ " "+ returnVersion);
+    	        updateTextView(returnKey+" "+returnValue+ " "+ returnVersion,false);
     	        resultCursor.moveToNext();
     	    	}
     	    }
     	else {
-    		updateTextView("Partition Empty");
+    		updateTextView("Partition Empty",false);
     	}
     }
 	
 	private void insertValues(String j) {
-		ContentValues _cv = new ContentValues();
 		int version = ++SimpleDynamoProvider.maxVersion;
 		for(int i=0 ; i<20 ; i++) {
 			try {
+				
 				obj.insertRequest(Integer.toString(i),j+Integer.toString(i),version);
 				Thread.sleep(1200);
 			} catch (InterruptedException e) {
@@ -94,6 +95,7 @@ public class SimpleDynamoActivity extends Activity {
 	}
 	
 	public void Get(View view) {
+		updateTextView("Partition Empty" , true);
 		for(int i =0; i<20; i++) {
 			Cursor resultCursor = mContentResolver.query(CONTENT_URI, null,Integer.toString(i), null, "ins");
 			if (resultCursor != null && resultCursor.moveToFirst()) {
@@ -108,9 +110,9 @@ public class SimpleDynamoActivity extends Activity {
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
-	    	        updateTextView(returnKey+" "+returnValue);
+	    	        updateTextView(returnKey+" "+returnValue, false);
 	    	    } else {
-	    		updateTextView("Partition Empty");
+	    		updateTextView("Partition Empty" , false);
 	    	    }
 		}
 	}
@@ -121,13 +123,16 @@ public class SimpleDynamoActivity extends Activity {
     	return portStr;
     }
     
-    public void updateTextView(String message) {
+    public void updateTextView(String message, final boolean set) {
     	final String msg= message;
     	uiHandle.post(new Runnable() {
     		public void run() {
     			TextView textView = (TextView)findViewById(R.id.textView1);
     			textView.setMovementMethod(new ScrollingMovementMethod());
-    	    	textView.append(msg+"\n");
+    	    	if (!set)
+    	    		textView.append(msg+"\n");
+    	    	else
+    	    		textView.setText(" ");
        		}
     	});
     }

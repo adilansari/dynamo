@@ -14,7 +14,7 @@ public class Message implements Serializable {
 	String key,value;
 	int version;
 	long rowId;
-	HashMap<String, String> map;
+	HashMap<String, String[]> map;
 	
 	{
 		this.Node_id = SimpleDynamoActivity.get_node_id();
@@ -35,7 +35,7 @@ public class Message implements Serializable {
 	}
 	
 	//recovery
-	Message(String id, HashMap<String,String> m, int version) {
+	Message(String id, HashMap<String,String[]> m, int version) {
 		this.id =id;
 		this.map =m;
 		this.version = version;

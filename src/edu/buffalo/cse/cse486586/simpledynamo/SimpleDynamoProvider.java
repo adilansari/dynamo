@@ -57,26 +57,26 @@ public class SimpleDynamoProvider extends ContentProvider {
 			insert(CONTENT_URI,_cv);
 			replicate(cord, key, value,version);
 		} else {
-			String nxt = list.get(cord).prev.data;
-			for (int i = 0; i < 2; i++) {
+			//String nxt = list.get(cord).prev.data;
+			/*for (int i = 0; i < 2; i++) {
 				Pool.execute(new Send(new Message("vote", Node_id), port_map.get(nxt)));
 				boolean vote = block_ins.poll(600, TimeUnit.MILLISECONDS) != null;
 				if (!vote) {
 					Log.e(TAG, "Timeout " + nxt);
-					fail_map.put(nxt, false);
+					
 				} else {
-					fail_map.put(nxt, true);
+				fail_map.put(nxt, true);
 				}
 				nxt = list.get(nxt).prev.data;
-			}
+			}*/
 			block_ins.clear();
 			Pool.execute(new Send(new Message("insertc",key,value,version),port_map.get(cord)));
-			boolean ins_suc= block_ins.poll(1000, TimeUnit.MILLISECONDS) != null;
+			boolean ins_suc= block_ins.poll(1200, TimeUnit.MILLISECONDS) != null;
 			if(!ins_suc) {
 				Log.e(TAG, "Timeout "+cord);
-				fail_map.put(cord, false);
+				//fail_map.put(cord, false);
 				replicate(cord, key, value,version);
-			} else {fail_map.put(cord, true);}
+			}// else {fail_map.put(cord, true);}
 			block_ins.clear();
 		}
 	}
@@ -207,17 +207,17 @@ public class SimpleDynamoProvider extends ContentProvider {
 		return c;
 	}
 	
-	public void recovery(HashMap<String, String> r_map, int version) {
+	public void recovery(HashMap<String, String[]> r_map, int version) {
 		Log.d(TAG, "Recovery method");
-		for(Map.Entry<String, String> entry: r_map.entrySet()) {
+		for(Map.Entry<String, String[]> entry: r_map.entrySet()) {
 			ContentValues _cv = new ContentValues();
 			String k = entry.getKey();
-			String v= entry.getValue();
+			String v[]= entry.getValue();
 			_cv.put(myHelper.KEY_FIELD, k);
-			_cv.put(myHelper.VALUE_FIELD, v);
-			_cv.put(myHelper.VERSION_FIELD, Integer.toString(version));
+			_cv.put(myHelper.VALUE_FIELD, v[0]);
+			_cv.put(myHelper.VERSION_FIELD, v[1]);
 			insert(CONTENT_URI,_cv);
-			replicate(Node_id, k, v,version);
+			replicate(Node_id, k, v[0],Integer.parseInt(v[1]));
     	}
 	}
 
