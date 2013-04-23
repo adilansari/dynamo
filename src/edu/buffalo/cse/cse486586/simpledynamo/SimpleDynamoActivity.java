@@ -44,13 +44,12 @@ public class SimpleDynamoActivity extends Activity {
 	}
 	
 	public static String get_node_id(){
-		//while(Node_id != null){}
 		return Node_id;
 	}
 	
 	public void LDump(View view) {
     	Cursor resultCursor = mContentResolver.query(CONTENT_URI, null, null, null, "local");
-    	updateTextView("Partition Empty" , true);
+    	//updateTextView("Partition Empty" , true);
     	if (resultCursor.getCount()!=0 && resultCursor.moveToFirst()) {
     	    while (!resultCursor.isAfterLast()) {
     	    	int keyIndex = resultCursor.getColumnIndex("key");
@@ -59,7 +58,7 @@ public class SimpleDynamoActivity extends Activity {
     	    	String returnKey = resultCursor.getString(keyIndex);
     	        String returnValue = resultCursor.getString(valueIndex);
     	        String returnVersion = resultCursor.getString(versionIndex);
-    	        updateTextView(returnKey+" "+returnValue+ " "+ returnVersion,false);
+    	        updateTextView(returnKey+" "+returnValue,false);
     	        resultCursor.moveToNext();
     	    	}
     	    }
@@ -95,7 +94,7 @@ public class SimpleDynamoActivity extends Activity {
 	}
 	
 	public void Get(View view) {
-		updateTextView("Partition Empty" , true);
+		//updateTextView("Partition Empty" , true);
 		for(int i =0; i<20; i++) {
 			Cursor resultCursor = mContentResolver.query(CONTENT_URI, null,Integer.toString(i), null, "ins");
 			if (resultCursor != null && resultCursor.moveToFirst()) {
@@ -104,7 +103,6 @@ public class SimpleDynamoActivity extends Activity {
 	    	        int versionIndex = resultCursor.getColumnIndex("version");
 	    	    	String returnKey = resultCursor.getString(keyIndex);
 	    	        String returnValue = resultCursor.getString(valueIndex);
-	    	        String returnVersion = resultCursor.getString(versionIndex);
 	    	        try {
 						Thread.sleep(1000);
 					} catch (InterruptedException e) {

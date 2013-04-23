@@ -57,26 +57,13 @@ public class SimpleDynamoProvider extends ContentProvider {
 			insert(CONTENT_URI,_cv);
 			replicate(cord, key, value,version);
 		} else {
-			//String nxt = list.get(cord).prev.data;
-			/*for (int i = 0; i < 2; i++) {
-				Pool.execute(new Send(new Message("vote", Node_id), port_map.get(nxt)));
-				boolean vote = block_ins.poll(600, TimeUnit.MILLISECONDS) != null;
-				if (!vote) {
-					Log.e(TAG, "Timeout " + nxt);
-					
-				} else {
-				fail_map.put(nxt, true);
-				}
-				nxt = list.get(nxt).prev.data;
-			}*/
 			block_ins.clear();
 			Pool.execute(new Send(new Message("insertc",key,value,version),port_map.get(cord)));
 			boolean ins_suc= block_ins.poll(1200, TimeUnit.MILLISECONDS) != null;
 			if(!ins_suc) {
 				Log.e(TAG, "Timeout "+cord);
-				//fail_map.put(cord, false);
 				replicate(cord, key, value,version);
-			}// else {fail_map.put(cord, true);}
+			}
 			block_ins.clear();
 		}
 	}
@@ -105,11 +92,8 @@ public class SimpleDynamoProvider extends ContentProvider {
 		}
 		if (rowId > 0) {
 			Uri newUri = ContentUris.withAppendedId(CONTENT_URI, rowId);
-			//update maxVersion
 			maxVersion = Math.max(maxVersion, newVersion);
-/*			getContext().getContentResolver().notifyChange(newUri, null);
-			Log.i(TAG, "Insertion success # " + Long.toString(rowId));
-*/			return newUri;
+			return newUri;
 		} else {
 			Log.e(TAG, "Insert to db failed");
 		}
@@ -201,7 +185,6 @@ public class SimpleDynamoProvider extends ContentProvider {
 		else if(sortOrder.equals("local"))
 			c= db.rawQuery("select * from "+myHelper.TABLE_NAME, null);
 		else {
-			//do a global query sort of thing
 			c= db.rawQuery("select * from "+myHelper.TABLE_NAME+" where key like '"+selection+"'", null);
 		}
 		return c;
