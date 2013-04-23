@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.app.Activity;
 import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.telephony.TelephonyManager;
@@ -54,10 +53,8 @@ public class SimpleDynamoActivity extends Activity {
     	    while (!resultCursor.isAfterLast()) {
     	    	int keyIndex = resultCursor.getColumnIndex("key");
     	        int valueIndex = resultCursor.getColumnIndex("value");
-    	        int versionIndex = resultCursor.getColumnIndex("version");
     	    	String returnKey = resultCursor.getString(keyIndex);
     	        String returnValue = resultCursor.getString(valueIndex);
-    	        String returnVersion = resultCursor.getString(versionIndex);
     	        updateTextView(returnKey+" "+returnValue,false);
     	        resultCursor.moveToNext();
     	    	}
@@ -95,24 +92,29 @@ public class SimpleDynamoActivity extends Activity {
 	
 	public void Get(View view) {
 		//updateTextView("Partition Empty" , true);
-		for(int i =0; i<20; i++) {
-			Cursor resultCursor = mContentResolver.query(CONTENT_URI, null,Integer.toString(i), null, "ins");
-			if (resultCursor != null && resultCursor.moveToFirst()) {
-	    	    	int keyIndex = resultCursor.getColumnIndex("key");
-	    	        int valueIndex = resultCursor.getColumnIndex("value");
-	    	        int versionIndex = resultCursor.getColumnIndex("version");
-	    	    	String returnKey = resultCursor.getString(keyIndex);
-	    	        String returnValue = resultCursor.getString(valueIndex);
-	    	        try {
-						Thread.sleep(1000);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
+		new Thread(
+				new Runnable() {
+					public void run() {
+						for (int i = 0; i < 20; i++) {
+							Cursor resultCursor = mContentResolver.query(CONTENT_URI,
+							null, Integer.toString(i), null, "ins");
+							if (resultCursor != null && resultCursor.moveToFirst()) {
+								int keyIndex = resultCursor.getColumnIndex("key");
+								int valueIndex = resultCursor.getColumnIndex("value");
+								String returnKey = resultCursor.getString(keyIndex);
+								String returnValue = resultCursor.getString(valueIndex);
+								try {
+									Thread.sleep(1000);
+								} catch (InterruptedException e) {
+									e.printStackTrace();
+								}
+								updateTextView(returnKey + " " + returnValue, false);
+							} else {
+								updateTextView("Partition Empty", false);
+							}
+						}
 					}
-	    	        updateTextView(returnKey+" "+returnValue, false);
-	    	    } else {
-	    		updateTextView("Partition Empty" , false);
-	    	    }
-		}
+				}).start();
 	}
 	
 	public String get_portStr() {

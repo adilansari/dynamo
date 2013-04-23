@@ -3,8 +3,6 @@ package edu.buffalo.cse.cse486586.simpledynamo;
 import java.io.*;
 import java.util.HashMap;
 
-import android.content.ContentValues;
-import android.util.Log;
 
 public class Message implements Serializable {
 
