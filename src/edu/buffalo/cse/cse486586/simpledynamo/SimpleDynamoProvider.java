@@ -83,12 +83,37 @@ public class SimpleDynamoProvider extends ContentProvider {
 			Node_id = SimpleDynamoActivity.get_node_id();
 		int newVersion= values.getAsInteger("version");
 		String key = values.getAsString("key");
+		String value = values.getAsString("value");
+		String cord = getNode(key);
 		Cursor resultCursor = query(CONTENT_URI, null, key, null, "ins");
 		long rowId = 0;
-		if(resultCursor.getCount() == 0 || (resultCursor.moveToFirst() && newVersion > resultCursor.getInt(resultCursor.getColumnIndex(myHelper.VERSION_FIELD)))) {
-			db = myDb.getWritableDatabase();
-			rowId= db.replace(myHelper.TABLE_NAME, myHelper.VALUE_FIELD, values);
-			Log.d(TAG, "New version inserted");
+		if(cord.equals(Node_id) && uri.equals(CONTENT_URI)) {	
+			if(resultCursor.getCount() == 0 || (resultCursor.moveToFirst() && newVersion > resultCursor.getInt(resultCursor.getColumnIndex(myHelper.VERSION_FIELD)))){
+				db = myDb.getWritableDatabase();
+				rowId= db.replace(myHelper.TABLE_NAME, myHelper.VALUE_FIELD, values);
+				Log.d(TAG, "New version inserted");
+				replicate(cord, key, value,newVersion);
+			}
+		} else if(uri.equals(CONTENT_URI)) {
+			block_ins.clear();
+			Pool.execute(new Send(new Message("insertc",key,value,newVersion),port_map.get(cord)));
+			boolean ins_suc;
+			try {
+				ins_suc = block_ins.poll(1200, TimeUnit.MILLISECONDS) != null;
+				if(!ins_suc) {
+					Log.e(TAG, "Timeout "+cord);
+					replicate(cord, key, value,newVersion);
+				}
+				block_ins.clear();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		} else {
+			if(resultCursor.getCount() == 0 || (resultCursor.moveToFirst() && newVersion > resultCursor.getInt(resultCursor.getColumnIndex(myHelper.VERSION_FIELD)))) {
+				db = myDb.getWritableDatabase();
+				rowId= db.replace(myHelper.TABLE_NAME, myHelper.VALUE_FIELD, values);
+				Log.d(TAG, "New replica version inserted");
+			}
 		}
 		if (rowId > 0) {
 			Uri newUri = ContentUris.withAppendedId(CONTENT_URI, rowId);
@@ -97,7 +122,7 @@ public class SimpleDynamoProvider extends ContentProvider {
 		} else {
 			Log.e(TAG, "Insert to db failed");
 		}
-		return null;
+		return uri;
 	}
 	
 	public String getNode(String Key) {
@@ -199,8 +224,8 @@ public class SimpleDynamoProvider extends ContentProvider {
 			_cv.put(myHelper.KEY_FIELD, k);
 			_cv.put(myHelper.VALUE_FIELD, v[0]);
 			_cv.put(myHelper.VERSION_FIELD, v[1]);
-			insert(CONTENT_URI,_cv);
-			replicate(Node_id, k, v[0],Integer.parseInt(v[1]));
+			insert(Receiver.DUP_CONTENT_URI,_cv);
+			//replicate(Node_id, k, v[0],Integer.parseInt(v[1]));
     	}
 	}
 

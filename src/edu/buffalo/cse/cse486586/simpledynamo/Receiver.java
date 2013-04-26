@@ -7,6 +7,7 @@ import java.util.concurrent.Executors;
 
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.net.Uri;
 import android.util.Log;
 
 class Receiver implements Runnable {
@@ -16,6 +17,9 @@ class Receiver implements Runnable {
 	private SimpleDynamoProvider provider;
 	private final String TAG = "adil recvr";
 	ExecutorService ex= Executors.newSingleThreadExecutor();
+	private static final String AUTHORITY = "edu.buffalo.cse.cse486586.simpledynamo.provider";
+	private static final String BASE_PATH = "dummy";
+	public static final Uri DUP_CONTENT_URI = Uri.parse("content://"+ AUTHORITY + "/" + BASE_PATH);
 	
 	Receiver (Message s) {
 		this.msg= s;
@@ -32,7 +36,6 @@ class Receiver implements Runnable {
 			values.put(myHelper.VALUE_FIELD, msg.value);
 			values.put(myHelper.VERSION_FIELD, Integer.toString(msg.version));
 			SimpleDynamoActivity.mContentResolver.insert(SimpleDynamoActivity.CONTENT_URI, values);
-			provider.replicate(SimpleDynamoActivity.get_node_id(), msg.key, msg.value, msg.version);
 		} else if(msg.id.equals("ins_ack")) {
 			try {
 				SimpleDynamoProvider.block_ins.put(msg.version);
@@ -44,7 +47,7 @@ class Receiver implements Runnable {
 			values.put(myHelper.KEY_FIELD, msg.key);
 			values.put(myHelper.VALUE_FIELD, msg.value);
 			values.put(myHelper.VERSION_FIELD, Integer.toString(msg.version));
-			SimpleDynamoActivity.mContentResolver.insert(SimpleDynamoActivity.CONTENT_URI, values);
+			SimpleDynamoActivity.mContentResolver.insert(DUP_CONTENT_URI, values);
 		} else if(msg.id.equals("query")) {
 			Cursor c= SimpleDynamoActivity.mContentResolver.query(SimpleDynamoActivity.CONTENT_URI, null, msg.key, null, "ins");
 			if(c!=null) {

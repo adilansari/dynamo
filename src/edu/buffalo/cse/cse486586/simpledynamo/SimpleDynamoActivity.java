@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.app.Activity;
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.telephony.TelephonyManager;
@@ -48,7 +49,7 @@ public class SimpleDynamoActivity extends Activity {
 	
 	public void LDump(View view) {
     	Cursor resultCursor = mContentResolver.query(CONTENT_URI, null, null, null, "local");
-    	//updateTextView("Partition Empty" , true);
+    	updateTextView("Partition Empty" , true);
     	if (resultCursor.getCount()!=0 && resultCursor.moveToFirst()) {
     	    while (!resultCursor.isAfterLast()) {
     	    	int keyIndex = resultCursor.getColumnIndex("key");
@@ -68,8 +69,12 @@ public class SimpleDynamoActivity extends Activity {
 		int version = ++SimpleDynamoProvider.maxVersion;
 		for(int i=0 ; i<20 ; i++) {
 			try {
-				
-				obj.insertRequest(Integer.toString(i),j+Integer.toString(i),version);
+				//obj.insertRequest(Integer.toString(i),j+Integer.toString(i),version);
+				ContentValues _cv = new ContentValues();
+				_cv.put(myHelper.KEY_FIELD, Integer.toString(i));
+				_cv.put(myHelper.VALUE_FIELD, j+Integer.toString(i));
+				_cv.put(myHelper.VERSION_FIELD, Integer.toString(version));
+				mContentResolver.insert(CONTENT_URI, _cv);
 				Thread.sleep(1200);
 			} catch (InterruptedException e) {
 				Log.e(TAG, "Put Sleep fail");
@@ -91,7 +96,7 @@ public class SimpleDynamoActivity extends Activity {
 	}
 	
 	public void Get(View view) {
-		//updateTextView("Partition Empty" , true);
+		updateTextView("Partition Empty" , true);
 		new Thread(
 				new Runnable() {
 					public void run() {
