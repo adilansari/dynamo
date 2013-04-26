@@ -73,7 +73,7 @@ public class SimpleDynamoActivity extends Activity {
 				ContentValues _cv = new ContentValues();
 				_cv.put(myHelper.KEY_FIELD, Integer.toString(i));
 				_cv.put(myHelper.VALUE_FIELD, j+Integer.toString(i));
-				_cv.put(myHelper.VERSION_FIELD, Integer.toString(version));
+				_cv.put(myHelper.VERSION_FIELD, version);
 				mContentResolver.insert(CONTENT_URI, _cv);
 				Thread.sleep(1200);
 			} catch (InterruptedException e) {

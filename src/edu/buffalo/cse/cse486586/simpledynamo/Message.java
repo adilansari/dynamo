@@ -33,9 +33,8 @@ public class Message implements Serializable {
 	}
 	
 	//recovery
-	Message(String id, HashMap<String,String[]> m, int version) {
+	Message(String id, HashMap<String,String[]> m) {
 		this.id =id;
 		this.map =m;
-		this.version = version;
 	}
 }

@@ -60,19 +60,18 @@ class Receiver implements Runnable {
 			if(SimpleDynamoProvider.fail_map.size() == 3 ) {
 				HashMap<String, String[]> map = new HashMap<String,String[]>();
 				Cursor c= SimpleDynamoActivity.mContentResolver.query(SimpleDynamoActivity.CONTENT_URI, null, null, null, "local");
-				String version =null;
 				if(c!= null && c.moveToFirst()) {
 					while(!c.isAfterLast()) {
 						int keyIndex = c.getColumnIndex("key");
 		    	        int valueIndex = c.getColumnIndex("value");
 		    	    	String returnKey = c.getString(keyIndex);
 		    	        String returnValue = c.getString(valueIndex);
-		    	        version = c.getString(c.getColumnIndex(myHelper.VERSION_FIELD));
-		    	        String arr[] = {returnValue,version};
+		    	        int version = c.getInt(c.getColumnIndex(myHelper.VERSION_FIELD));
+		    	        String arr[] = {returnValue,Integer.toString(version)};
 		    	        map.put(returnKey, arr);
 		    	        c.moveToNext();
 					}
-					ex.execute(new Send(new Message("recover",map, Integer.parseInt(version)),(Integer.parseInt(msg.Node_id))*2));
+					ex.execute(new Send(new Message("recover",map),(Integer.parseInt(msg.Node_id))*2));
 				}
 			}
 		} else if(msg.id.equals("recover")) {

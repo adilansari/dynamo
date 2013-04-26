@@ -77,11 +77,16 @@ public class SimpleDynamoProvider extends ContentProvider {
 		return null;
 	}
 
-	
 	public Uri insert(Uri uri, ContentValues values) {
 		if(Node_id == null)
 			Node_id = SimpleDynamoActivity.get_node_id();
-		int newVersion= values.getAsInteger("version");
+		int newVersion = 0;
+		if(values.containsKey("version"))
+			newVersion= values.getAsInteger("version");
+		else {
+			newVersion = maxVersion + 3;
+			values.put(myHelper.VALUE_FIELD, newVersion);
+		}
 		String key = values.getAsString("key");
 		String value = values.getAsString("value");
 		String cord = getNode(key);
@@ -209,9 +214,10 @@ public class SimpleDynamoProvider extends ContentProvider {
 			c= db.rawQuery("select * from "+myHelper.TABLE_NAME+" where key like '"+selection+"'", null);
 		else if(sortOrder.equals("local"))
 			c= db.rawQuery("select * from "+myHelper.TABLE_NAME, null);
-		else {
+		else if (selection != null)
 			c= db.rawQuery("select * from "+myHelper.TABLE_NAME+" where key like '"+selection+"'", null);
-		}
+		else
+			c= db.rawQuery("select * from "+myHelper.TABLE_NAME, null);
 		return c;
 	}
 	
@@ -223,7 +229,7 @@ public class SimpleDynamoProvider extends ContentProvider {
 			String v[]= entry.getValue();
 			_cv.put(myHelper.KEY_FIELD, k);
 			_cv.put(myHelper.VALUE_FIELD, v[0]);
-			_cv.put(myHelper.VERSION_FIELD, v[1]);
+			_cv.put(myHelper.VERSION_FIELD, Integer.parseInt(v[1]));
 			insert(Receiver.DUP_CONTENT_URI,_cv);
     	}
 	}
