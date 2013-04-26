@@ -45,7 +45,7 @@ public class SimpleDynamoProvider extends ContentProvider {
 		return obj;
 	}
 	
-	public void insertRequest(String key, String value, int version) throws InterruptedException {
+	/*public void insertRequest(String key, String value, int version) throws InterruptedException {
 		if(Node_id == null)
 			Node_id = SimpleDynamoActivity.get_node_id();
 		String cord = getNode(key);
@@ -67,7 +67,7 @@ public class SimpleDynamoProvider extends ContentProvider {
 			block_ins.clear();
 		}
 	}
-	
+*/	
 	public void replicate(String node, String key, String value, int version) {
 		Pool.execute(new Send(new Message("replica",key,value,version),port_map.get(list.get(node).prev.data)));
 		Pool.execute(new Send(new Message("replica",key,value,version),port_map.get(list.get(node).next.data)));
@@ -225,7 +225,6 @@ public class SimpleDynamoProvider extends ContentProvider {
 			_cv.put(myHelper.VALUE_FIELD, v[0]);
 			_cv.put(myHelper.VERSION_FIELD, v[1]);
 			insert(Receiver.DUP_CONTENT_URI,_cv);
-			//replicate(Node_id, k, v[0],Integer.parseInt(v[1]));
     	}
 	}
 
