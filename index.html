@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="Dynamo : Amazon mini dynamo" />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Dynamo</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/adilansari/dynamo">View on GitHub</a>
+
+          <h1 id="project_title">Dynamo</h1>
+          <h2 id="project_tagline">Amazon mini dynamo</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/adilansari/dynamo/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/adilansari/dynamo/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>
+<a name="amazons-mini-dynamo" class="anchor" href="#amazons-mini-dynamo"><span class="octicon octicon-link"></span></a>Amazon's Mini Dynamo</h1>
+
+<h1></h1>
+
+<hr><ul>
+<li>
+<p>Simplified version of Dynamo (Key-Value storage), covers :</p>
+
+<ul>
+<li>ID space partitioning/re-partitioning.</li>
+<li>Ring based routing</li>
+<li>Node joins</li>
+<li>Quorum based replication</li>
+<li>Recovery from replicated storage after failure</li>
+</ul>
+</li>
+<li><p>SHA-1 hash function is used to lexically arrange nodes in a ring and find the location for a particular key to be stored.</p></li>
+<li><p>Each node maintains a successor and predecessor pointer for nodes in the ring.</p></li>
+<li>
+<p>Content Provider is NoSQL storage that:</p>
+
+<ul>
+<li>The first column should be named as “key”. This column is used to store all keys. </li>
+<li>The first column should be named as “value”. This column is used to store all values.</li>
+</ul>
+</li>
+<li><p>Finger tables are not implemented.</p></li>
+<li><p>Failure Handling: All focus on correctness rather than performance</p></li>
+</ul><h3>
+<a name="put-buttons" class="anchor" href="#put-buttons"><span class="octicon octicon-link"></span></a>Put buttons</h3>
+
+<ul>
+<li>All Put* buttons operate the same way except that they insert different values with the same set of keys.</li>
+<li>When touched, it inserts 20  pairs into your storage by using your content provider’s insert().</li>
+<li>Each touch of the button resets the sequence number to 0.</li>
+<li>The format of the  pairs is the following:
+
+<ul>
+<li>Key: the sequence number represented as a string starting from 0 (i.e., “0”, “1”, “2”, …, “19”.)</li>
+<li>Value: string for each button concatenated by each sequence number.
+
+<ul>
+<li>For the button “Put1”, the values are “Put10”, “Put11”, “Put12”, etc.</li>
+<li>For the button “Put2”, the values are “Put20”, “Put21”, “Put22”, etc.</li>
+<li>For the button “Put3”, the values are “Put30”, “Put31”, “Put32”, etc.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul><h3>
+<a name="get" class="anchor" href="#get"><span class="octicon octicon-link"></span></a>Get</h3>
+
+<ul>
+<li>This button retrieves twenty keys, “0”, “1”, …, “19” and their corresponding values using content provider’s query() interface.</li>
+</ul><h3>
+<a name="ldump" class="anchor" href="#ldump"><span class="octicon octicon-link"></span></a>LDump</h3>
+
+<ul>
+<li>When touched, this button dumps and displays all the  pairs stored in your local partition of the node.</li>
+</ul><hr><h1>
+<a name="content-provider" class="anchor" href="#content-provider"><span class="octicon octicon-link"></span></a>Content Provider</h1>
+
+<ul>
+<li>Content Provider deals with the main storage functionalities :</li>
+</ul><h3>
+<a name="membership" class="anchor" href="#membership"><span class="octicon octicon-link"></span></a>Membership</h3>
+
+<ul>
+<li>Each node knows all other nodes in the system and also knows exactly which partition belongs to which node; any node can forward a request to the correct node without using a ring-based routing.</li>
+<li>Assumption: There are always 3 nodes in the system and atmost 1 failure at a time.</li>
+</ul><h3>
+<a name="quorum-replication" class="anchor" href="#quorum-replication"><span class="octicon octicon-link"></span></a>Quorum Replication</h3>
+
+<ul>
+<li>The replication degree N is 3. This means that given a key, the key’s coordinator as well as the 2 successor nodes in the Dynamo ring should store the key.</li>
+<li>Both the reader quorum size R and the writer quorum size W is 2.</li>
+<li>The coordinator for a get/put request contacts other two nodes and get the votes. For each request, the coordinator returns to the requester whether the request was successful or not. If the coordinator fails to obtain the minimum number of votes, it returns an error.</li>
+<li>For write operations, all objects are versioned in order to distinguish stale copies from the most recent copy.</li>
+<li>For read operations, if the readers in the reader quorum have different versions of the same object, the coordinator will pick the most recent version and return it.</li>
+</ul><hr><h2>
+<a name="references" class="anchor" href="#references"><span class="octicon octicon-link"></span></a>References</h2>
+
+<p>[1] Read about Dynamo <a href="http://www.allthingsdistributed.com/files/amazon-dynamo-sosp2007.pdf">here</a></p>
+
+<p>[2] Single best resource on Android, <a href="http://developer.android.com">Android dev</a></p>
+
+<p>[3] Link to another note on Dynamo, <a href="http://www.informationweek.com/software/information-management/amazon-dynamodb-big-datas-big-cloud-mome/232500104">here</a></p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Dynamo maintained by <a href="https://github.com/adilansari">adilansari</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
